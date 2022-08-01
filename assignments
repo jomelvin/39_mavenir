@@ -45,9 +45,11 @@ Deleting assignment
 
 *****************************************************************************************************
 
-delete voting pod - : Application works 
-delete results pods - application works
-delete db pod - vote and result application do not work . Restarting the result pod gets the application to work
+delete voting pod - : Application works and a new voting pod spawns
+delete results pods - application works and a new results pod spawns
+delete db pod - vote works and result application do not work . 
+Since data is not backed up in the db pod the result application stops working after the db pod is deleted
+Restarting the result pod gets the application to work.
 
 *****************************************************************************************************
 
