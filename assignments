@@ -1,0 +1,105 @@
+[root@ip-172-31-29-223 ~]# git clone https://github.com/ashishrpandey/example-voting-app
+Cloning into 'example-voting-app'...
+remote: Enumerating objects: 494, done.
+remote: Total 494 (delta 0), reused 0 (delta 0), pack-reused 494
+Receiving objects: 100% (494/494), 236.17 KiB | 542.00 KiB/s, done.
+Resolving deltas: 100% (179/179), done.
+
+
+[root@ip-172-31-29-223 ~]# cd example-voting-app/k8s-specifications/
+
+[root@ip-172-31-29-223 k8s-specifications]# ls
+db-deployment.yaml     redis-service.yaml      vote-deployment.yaml
+db-service.yaml        result-deployment.yaml  vote-service.yaml
+redis-deployment.yaml  result-service.yaml     worker-deployment.yaml
+
+*****************************************************************************************************
+
+Creating the voting result db and redis pods and services with the above yaml files.
+
+*****************************************************************************************************
+
+[root@ip-172-31-29-223 k8s-specifications]# kubectl apply -f
+Error: flag needs an argument: 'f' in -f
+See 'kubectl apply --help' for usage.
+[root@ip-172-31-29-223 k8s-specifications]# kubectl apply -f .
+deployment.apps/db created
+service/db created
+deployment.apps/redis created
+service/redis created
+deployment.apps/result created
+service/result created
+deployment.apps/vote created
+service/vote created
+deployment.apps/worker created
+
+
+http://13.250.37.110:31000/
+http://13.250.37.110:31001/
+
+Voting app port = 31000
+Result app port = 31001
+
+
+Deleting assignment
+
+*****************************************************************************************************
+
+delete voting pod - : Application works 
+delete results pods - application works
+delete db pod - vote and result application do not work . Restarting the result pod gets the application to work
+
+*****************************************************************************************************
+
+[root@ip-172-31-29-223 k8s-specifications]# kubectl delete po vote-94849dc97-mbl7s
+pod "vote-94849dc97-mbl7s" deleted
+[root@ip-172-31-29-223 k8s-specifications]# kubectl delete po result-5d57b59f4b-lrh8z
+pod "result-5d57b59f4b-lrh8z" deleted
+[root@ip-172-31-29-223 k8s-specifications]# kubectl delete po db-b54cd94f4-fljms
+pod "db-b54cd94f4-fljms" deleted
+
+
+[root@ip-172-31-29-223 k8s-specifications]# kubectl get po --namespace=master-work
+NAME                      READY   STATUS        RESTARTS   AGE
+db-b54cd94f4-6hlw4        1/1     Running       0          31s
+db-b54cd94f4-gbrvd        0/1     Terminating   0          4m42s
+redis-868d64d78-pp5x5     1/1     Running       0          4m42s
+result-5d57b59f4b-pvhmt   1/1     Running       0          4m41s
+vote-94849dc97-ckd2c      1/1     Running       0          4m41s
+worker-dd46d7584-25257    0/1     Error         0          4m41s
+[root@ip-172-31-29-223 k8s-specifications]# kubectl get po --namespace=master-work
+NAME                      READY   STATUS        RESTARTS   AGE
+db-b54cd94f4-6hlw4        1/1     Running       0          32s
+db-b54cd94f4-gbrvd        0/1     Terminating   0          4m43s
+redis-868d64d78-pp5x5     1/1     Running       0          4m43s
+result-5d57b59f4b-pvhmt   1/1     Running       0          4m42s
+vote-94849dc97-ckd2c      1/1     Running       0          4m42s
+worker-dd46d7584-25257    0/1     Error         0          4m42s
+[root@ip-172-31-29-223 k8s-specifications]# kubectl get po --namespace=master-work
+NAME                      READY   STATUS    RESTARTS   AGE
+db-b54cd94f4-6hlw4        1/1     Running   0          2m
+redis-868d64d78-pp5x5     1/1     Running   0          6m11s
+result-5d57b59f4b-pvhmt   1/1     Running   0          6m10s
+vote-94849dc97-ckd2c      1/1     Running   0          6m10s
+worker-dd46d7584-25257    1/1     Running   1          6m10s
+[root@ip-172-31-29-223 k8s-specifications]#
+
+*******************************************************************************
+
+Restarting the stuck result pods leads to the application to work again
+
+*******************************************************************
+
+[root@ip-172-31-29-223 k8s-specifications]# kubectl delete po result-5d57b59f4b-pvhmt --namespace=master-work
+pod "result-5d57b59f4b-pvhmt" deleted
+^C
+[root@ip-172-31-29-223 k8s-specifications]# kubectl get po --namespace=master-work
+NAME                      READY   STATUS        RESTARTS   AGE
+db-b54cd94f4-6hlw4        1/1     Running       0          7m26s
+redis-868d64d78-pp5x5     1/1     Running       0          11m
+result-5d57b59f4b-d57zh   1/1     Running       0          4s
+result-5d57b59f4b-pvhmt   1/1     Terminating   0          11m
+vote-94849dc97-ckd2c      1/1     Running       0          11m
+worker-dd46d7584-25257    1/1     Running       1          11m
+[root@ip-172-31-29-223 k8s-specifications]# kubectl get po --namespace=master-work
+
